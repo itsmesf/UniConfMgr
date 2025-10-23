@@ -7,3 +7,4 @@ email-validator==2.3.0
 gunicorn
 psycopg2-binary
 xhtml2pdf
+Flask-Migrate
