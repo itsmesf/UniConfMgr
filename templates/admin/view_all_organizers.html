@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block title %}All Approved Organizers{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md max-w-7xl mx-auto">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-3">
+        <h2 class="text-2xl font-bold text-gray-800">Global Organizer Roster</h2>
+        <a href="{{ url_for('auth.dashboard') }}" class="text-sm text-gray-600 hover:text-indigo-600">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Organizer Name</th>
+                    <th scope="col" class="px-6 py-3">Email</th>
+                    <th scope="col" class="px-6 py-3">University</th>
+                    <th scope="col" class="px-6 py-3">Conference</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in organizer_roles %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ role.user.name }}</td>
+                    <td class="px-6 py-4">{{ role.user.email }}</td>
+                    <td class="px-6 py-4">{{ role.user.university_name or 'N/A' }}</td>
+                    <td class="px-6 py-4">
+                        <a href="{{ url_for('conference.explore_more', conf_id=role.conference.conference_id) }}" class="font-medium text-indigo-600 hover:underline">
+                            {{ role.conference.title }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Approved</span>
+                    </td>
+
+                    <td class="px-6 py-4">
+                        <form action="{{ url_for('admin.role_action', role_id=role.id, action='reject') }}"
+                              method="POST"
+                              onsubmit="return confirm('WARNING: Are you sure you want to REVOKE organizer status from {{ role.user.name }} for this conference? This action is irreversible.');">
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded transition duration-300">
+                                Revoke Role
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        No approved organizers found in the system yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

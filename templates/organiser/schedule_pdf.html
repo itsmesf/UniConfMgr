@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ conference.title }} - Official Program Schedule</title>
+    <style>
+        /* General Professional Typography and Reset */
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 5px; /* Minimal outer padding set to 5px */
+            font-size: 10pt;
+            color: #1f2937;
+        }
+
+        /* Header Styling */
+        header {
+            margin-bottom: 5px;
+        }
+        h1 {
+            color: #312e81;
+            border-bottom: 2px solid #a5b4fc;
+            padding-bottom: 4px; /* Minimal vertical padding */
+            margin-bottom: 2px; /* Minimal margin below title */
+            font-size: 16pt;
+            font-weight: bold;
+        }
+
+        /* P tags directly under Header (Dates/Location) */
+        header p {
+            margin: 1px 0; /* Extremely tight spacing */
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        /* Day Headers */
+        h2 {
+            color: #10b981;
+            margin-top: 3px; /* Minimal vertical gap before new day */
+            margin-bottom: 4px;
+            padding: 2px 0; /* Minimal vertical padding */
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+
+        /* Track Headers */
+        h3 {
+            color: #5b21b6;
+            background-color: #f3f4f6;
+            padding: 4px 8px; /* Minimal padding */
+            margin-top: 3px; /* Reduced margin above track block */
+            margin-bottom: 0;
+            font-size: 10pt;
+            border-left: 4px solid #a78bfa;
+            font-weight: bold;
+        }
+
+        /* Track Block Description */
+        .track-block p {
+            margin-top: 2px !important; /* Minimal space after track header */
+            margin-bottom: 4px !important;
+            padding-left: 8px;
+            font-size: 8pt;
+        }
+
+        /* Blocks and Lists */
+        .track-block { page-break-inside: avoid; margin-bottom: 8px; } /* Tightened spacing between track sections */
+
+        /* Table Structure and Spacing */
+        table { width: 100%; border-collapse: collapse; margin-top: 0; }
+        th, td {
+            border: 1px solid #eee;
+            padding: 4px; /* Minimal internal cell padding */
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            font-weight: bold;
+            font-size: 9pt;
+        }
+
+        /* Paper List Styling */
+        .paper-list {
+            margin-top: 0px; /* Reduced spacing above list */
+            padding-left: 8px;
+            font-size: 10pt;
+        }
+        .paper-list li {
+            margin-bottom: 1px; /* Minimal vertical gap between papers */
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 5px; /* Minimal footer space */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>{{ conference.title }} Program Schedule</h1>
+        <p><strong>Dates:</strong> {{ conference.start_date | strftime('%B %d, %Y') }} - {{ conference.end_date | strftime('%B %d, %Y') }}</p>
+        <p><strong>Location:</strong> {{ conference.location }}</p>
+    </header>
+
+    {% for date, sessions_that_day in sessions_by_date.items() %}
+
+        <h2 style="color: #10b981; margin-top: 25px; margin-bottom: 10px; font-size: 17pt; border-bottom: 1px solid #ccc;">
+            Day: {{ date | strftime('%A, %B %d, %Y') }}
+        </h2>
+
+        {% set tracks_that_day = sessions_that_day | groupby('track.name') %}
+
+        {% for track_name, sessions_in_track in tracks_that_day %}
+            {% set first_session = sessions_in_track | first %}
+            {% set track = first_session.track %}
+            <div class="track-block">
+
+                <h3>{{ track.name if track else 'General/Unassigned Sessions' }}</h3>
+
+                <p style="font-size: 10pt; color: #6b7280; margin-bottom: 8px; padding-left: 15px;">
+                    {{ track.description if track else 'Sessions not assigned to a specific track.' }}
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="session-time">Time</th>
+                            <th>Event/Session / Papers</th>
+                            <th class="session-location">Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions_in_track | sort(attribute='schedule_time') %}
+                            <tr>
+                                <td class="session-time">{{ session.schedule_time | strftime('%I:%M %p') }}</td>
+
+                                <td>
+                                    <strong>{{ session.name }}</strong>
+
+                                    {% if session.session_chair_role %}
+                                        <div class="chair">Chair: {{ session.session_chair_role.user.name }}</div>
+                                    {% endif %}
+
+                                    {% set confirmed_papers = [] %}
+                                    {% for session_paper in session.papers_in_session %}
+                                        {% set paper = session_paper.paper %}
+
+                                        {% set is_accepted = paper.status.name == 'accepted' %}
+                                        {% set is_paid = paper.author_role.registration_link and paper.author_role.registration_link.payment_status.name == 'completed' %}
+
+                                        {% if is_accepted and is_paid %}
+                                            {% set _ = confirmed_papers.append(paper) %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if confirmed_papers %}
+                                        <ul class="paper-list">
+                                            {% for paper in confirmed_papers %}
+                                                <li>
+                                                    (ID: {{ paper.paper_id }}) {{ paper.title }}
+                                                    — Author: {{ paper.author_role.user.name }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ session.location | default('TBD', True) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No sessions have been scheduled yet.</p>
+    {% endfor %}
+
+    <footer>
+        <p style="text-align: right; margin-top: 50px; font-size: 10pt; color: #4b5563;">Generated by UniConfMgr</p>
+    </footer>
+
+</body>
+</html>

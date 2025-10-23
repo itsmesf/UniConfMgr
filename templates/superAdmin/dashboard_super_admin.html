@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block title %}Super Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+
+    <div class="mb-8 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Super Admin Dashboard</h1>
+        <p class="mt-2 text-gray-600">Welcome, {{ user_name }}! You have full oversight of the platform.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <a href="{{ url_for('auth.add_admin') }}" class="block p-6 bg-gray-50 hover:bg-blue-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-200 rounded-full">
+                    <span class="text-2xl">👤</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Add New Admin</h5>
+                    <p class="text-sm text-gray-600">Create a new administrative user.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('auth.view_admins') }}" class="block p-6 bg-gray-50 hover:bg-green-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-200 rounded-full">
+                    <span class="text-2xl">👥</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Manage Admins</h5>
+                    <p class="text-sm text-gray-600">View and remove existing admins.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('auth.index') }}" class="block p-6 bg-gray-50 hover:bg-gray-200 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-gray-200 rounded-full">
+                    <span class="text-2xl">🌐</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">View Public Site</h5>
+                    <p class="text-sm text-gray-600">Go to the main landing page.</p>
+                </div>
+            </div>
+        </a>
+        
+        </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+
+{% block title %}Author Hub - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8 p-6 bg-white shadow-xl rounded-lg">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Author Hub: <span class="text-blue-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('auth.dashboard') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to User Hub
+        </a>
+    </div>
+
+    <div class="p-5 bg-blue-50 border-l-4 border-blue-400 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+            <p class="text-lg font-medium text-blue-800">
+                Welcome, <span class="font-bold text-blue-900">{{ session.user_name }}</span>.
+            </p>
+        </div>
+
+        <a href="{{ url_for('schedule.get_public_schedule_pdf', conf_id=conference.conference_id) }}"
+           class="mt-3 md:mt-0 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150 shadow-md">
+            <i class="fas fa-file-pdf mr-1"></i> Download Program Schedule
+        </a>
+    </div>
+    {% if paper %}
+        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2">Your Submission</h2>
+        <div class="bg-gray-100 p-5 rounded-md border space-y-2">
+            <p class="text-xl font-bold text-gray-900">{{ paper.title }}</p>
+            <p class="text-sm text-gray-600">Status:
+                <span class="font-medium text-purple-700">{{ paper.status.name.replace('_', ' ').title() }}</span>
+            </p>
+            <p class="text-sm text-gray-600">Track: {{ paper.track.name }}</p>
+
+            <a href="{{ url_for('author.view_submission', conf_id=conference.conference_id) }}"
+               class="mt-2 inline-block text-blue-600 hover:underline font-semibold">
+                View Submission Details & Decisions
+            </a>
+        </div>
+
+    {% else %}
+        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2">Action Required</h2>
+        <div class="text-center py-10 bg-yellow-50 rounded-lg border border-yellow-300">
+            <p class="text-lg text-yellow-800 mb-4">You have not submitted a paper yet. Please proceed with your submission.</p>
+
+            <a href="{{ url_for('author.submit_paper', conf_id=conference.conference_id) }}"
+               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md shadow-lg transition duration-300">
+                <i class="fas fa-upload mr-2"></i> Submit Your Abstract & Paper
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'layout.html' %}
+
+{% block title %}Organizer Dashboard - {{ conference.title }}{% endblock %}
+
+{% block content %}
+
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-xl">
+
+    <div class="mb-8 border-b pb-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">
+                Organizer Dashboard: <span class="text-indigo-600">{{ conference.title }}</span>
+            </h1>
+            <p class="mt-2 text-gray-600">
+                Manage the details, participants, and schedule for your conference.
+            </p>
+        </div>
+        <a href="{{ url_for('auth.dashboard') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to User Hub
+        </a>
+    </div>
+
+   <h2 class="text-xl font-semibold text-gray-700 mb-4">Current Status</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+    <div class="p-5 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Total Approved Users</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">{{ approved_users_count }}</p>
+    </div>
+
+    <div class="p-5 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Pending Reviewers</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">
+            <a href="{{ url_for('organizer.manage_reviewers', conf_id=conference.conference_id) }}" class="hover:underline text-yellow-700">
+                {{ pending_reviewers_count }}
+            </a>
+        </p>
+    </div>
+
+    <div class="p-5 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Tracks Defined</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">{{ tracks_count }}</p>
+    </div>
+
+    <div class="p-5 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-sm">
+        <p class="text-sm font-medium text-gray-500">Papers Submitted</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">{{ papers_submitted_count }}</p>
+    </div>
+
+</div>
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Management Areas</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <a href="{{ url_for('organizer.manage_reviewers', conf_id=conference.conference_id) }}"
+           class="block p-6 bg-gray-50 hover:bg-yellow-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-yellow-200 rounded-full">
+                    <span class="text-2xl">👥</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Reviewer Approval</h5>
+                    <p class="text-sm text-gray-600">Review and approve pending reviewer requests.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organizer.view_participants', conf_id=conference.conference_id, role_filter='all') }}"
+           class="block p-6 bg-gray-50 hover:bg-indigo-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-indigo-200 rounded-full">
+                    <span class="text-2xl">📋</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">View All Participants</h5>
+                    <p class="text-sm text-gray-600">See all approved Participants, Authors, and Reviewers.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organizer.manage_papers', conf_id=conference.conference_id) }}"
+           class="block p-6 bg-gray-50 hover:bg-red-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-red-200 rounded-full">
+                    <span class="text-2xl">📄</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Paper Management</h5>
+                    <p class="text-sm text-gray-600">View submissions, assign reviewers, and finalize decisions.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organizer.tracks_sessions', conf_id=conference.conference_id) }}"
+           class="block p-6 bg-gray-50 hover:bg-teal-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-teal-200 rounded-full">
+                    <span class="text-2xl">🧩</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Define Structure (Tracks & Sessions)</h5>
+                    <p class="text-sm text-gray-600">Create and edit the conference tracks and session time slots.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organizer.manage_session_papers', conf_id=conference.conference_id) }}"
+            class="block p-6 bg-gray-50 hover:bg-purple-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+                <div class="flex items-center">
+                    <div class="p-3 bg-purple-200 rounded-full">
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <div class="ml-4">
+                        <h5 class="text-lg font-bold text-gray-900">Assign Papers to Slots</h5>
+                        <p class="text-sm text-gray-600">Final step: Schedule accepted/paid papers into defined sessions.</p>
+                    </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('schedule.view_schedule_html', conf_id=conference.conference_id) }}"
+           class="block p-6 bg-gray-50 hover:bg-red-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-red-200 rounded-full">
+                    <span class="text-2xl">🚀</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Publish Schedule (PDF)</h5>
+                    <p class="text-sm text-gray-600">Upload and publish the final program schedule PDF.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organizer.edit_details', conf_id=conference.conference_id) }}"
+           class="block p-6 bg-gray-50 hover:bg-blue-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-200 rounded-full">
+                    <span class="text-2xl">✍️</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Complete Conference Details</h5>
+                    <p class="text-sm text-gray-600">Add description, location, fees, and final dates.</p>
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+</div>
+{% endblock %}

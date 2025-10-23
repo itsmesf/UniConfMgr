@@ -1,0 +1,112 @@
+{% extends 'layout.html' %}
+
+{% block title %}Session Assignment - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto bg-white shadow-xl rounded-lg p-8 mt-10">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Final Session Assignment</h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-md mb-8 shadow-sm">
+        <p class="text-lg font-medium text-indigo-800">
+            Available Papers for Assignment: <span class="font-bold text-xl">{{ available_papers | length }}</span>
+        </p>
+        <p class="text-sm text-gray-700 mt-1">Only accepted and paid papers are listed below and available for assignment.</p>
+    </div>
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4">Scheduled Sessions</h2>
+
+    {% set sessions_by_date = sessions | groupby('date_key') %}
+
+    {% for date, sessions_that_day in sessions_by_date %}
+
+        <h3 class="text-xl font-bold text-teal-700 mt-6 mb-3">
+            Day: {{ date | strftime('%A, %B %d, %Y') }}
+        </h3>
+
+        <div class="space-y-4">
+        {% for session in sessions_that_day | sort(attribute='schedule_time') %}
+            {% set assigned_papers = session.papers_in_session %}
+
+            <div class="p-4 border rounded-lg shadow-sm bg-white border-l-4 border-purple-500">
+
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-lg font-bold text-gray-900">{{ session.name }}</p>
+                        <p class="text-sm text-gray-600">
+                            {{ session.schedule_time | strftime('%I:%M %p') }} | {{ session.location }} | Track: {{ session.track.name }}
+                        </p>
+                    </div>
+                    <p class="font-medium text-sm text-indigo-600">
+                        Chair: {{ session.session_chair_role.user.name if session.session_chair_role else 'TBA' }}
+                    </p>
+                </div>
+
+                <hr class="my-3">
+
+                {% if assigned_papers %}
+                    <p class="text-sm font-semibold text-green-700 mb-2">Assigned Papers ({{ assigned_papers | length }}):</p>
+                    <ul class="list-disc list-inside text-sm ml-4 mb-2">
+                        {% for sp in assigned_papers %}
+                            <li>ID {{ sp.paper.paper_id }}: {{ sp.paper.title }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-sm font-semibold text-red-700 mb-2">No papers assigned yet.</p>
+                {% endif %}
+
+
+                <form method="POST" action="{{ url_for('organizer.assign_session_post', conf_id=conference.conference_id) }}" class="flex items-center space-x-3 mt-4">
+                    <input type="hidden" name="session_id" value="{{ session.session_id }}">
+
+                    <select name="paper_id" required class="flex-grow rounded-md border-gray-300 shadow-sm p-2 text-sm focus:ring-indigo-500">
+                        <option value="">-- Select Available Paper --</option>
+
+                        {# CRITICAL FIX: Filter papers based on the current session's track #}
+                        {% set session_track_id = session.track_id %}
+                        {% set matching_papers = available_papers | selectattr('track_id', 'equalto', session_track_id) | list %}
+
+                        {% if matching_papers %}
+                            <optgroup label="✅ Matching Track Papers ({{ session.track.name }})">
+                            {% for paper in matching_papers %}
+                                <option value="{{ paper.paper_id }}">
+                                    [ID {{ paper.paper_id }}] {{ paper.title }}
+                                </option>
+                            {% endfor %}
+                            </optgroup>
+                        {% endif %}
+
+                        {# Display non-matching papers as a secondary option #}
+                        <optgroup label="— All Other Available Papers —">
+                        {% for paper in available_papers %}
+                            {% if paper.track_id != session_track_id %}
+                                <option value="{{ paper.paper_id }}" class="text-gray-500">
+                                    [ID {{ paper.paper_id }}] {{ paper.title }} (Track: {{ paper.track.name }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                        </optgroup>
+
+                    </select>
+
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition">
+                        Assign Slot
+                    </button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="text-center py-10 bg-gray-50 rounded-lg border">
+            <p class="text-lg text-gray-600">No sessions have been defined yet. Define structure first.</p>
+        </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

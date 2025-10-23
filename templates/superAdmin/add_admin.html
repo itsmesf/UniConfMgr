@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add New Admin{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg mx-auto mt-10">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Create a New Admin</h2>
+        <a href="{{ url_for('auth.dashboard') }}" class="text-sm text-gray-600 hover:text-indigo-600">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    {# --- The flashed messages are now handled by layout.html --- #}
+
+    <form action="{{ url_for('auth.add_admin') }}" method="POST">
+        <div class="mb-4">
+            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
+            <input type="text" id="name" name="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+
+        <div class="mb-4">
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+            <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+
+        <div class="mb-6">
+            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Temporary Password</label>
+            <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+        
+        <hr class="my-6">
+        <p class="text-gray-600 text-sm mb-4">Optional Information</p>
+
+        <div class="mb-4">
+            <label for="contact_no" class="block text-gray-700 text-sm font-bold mb-2">Contact Number</label>
+            <input type="text" id="contact_no" name="contact_no" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        
+        <div class="mb-4">
+            <label for="university_name" class="block text-gray-700 text-sm font-bold mb-2">University Name</label>
+            <input type="text" id="university_name" name="university_name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        
+        <div class="mb-4">
+            <label for="department" class="block text-gray-700 text-sm font-bold mb-2">Department</label>
+            <input type="text" id="department" name="department" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <div class="mt-8">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Create Admin Account
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

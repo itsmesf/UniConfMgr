@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+<div class="w-full max-w-md bg-white p-8 rounded-lg shadow-lg mx-auto mt-10">
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Log In to Your Account</h2>
+
+    <form action="{{ url_for('auth.login') }}" method="POST">
+        <div class="mb-4">
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+            <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+        <div class="mb-4">
+            <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+            <input type="password" id="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+
+        <div class="text-right text-sm mb-6">
+            <a href="{{ url_for('auth.reset_password_request') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Forgot your password?
+            </a>
+        </div>
+
+        <div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Log In
+            </button>
+        </div>
+    </form>
+    <p class="mt-6 text-center text-sm">
+        Don't have an account?
+        <a href="{{ url_for('auth.register') }}" class="font-bold text-indigo-600 hover:text-indigo-500">
+            Register Now
+        </a>
+    </p>
+</div>
+{% endblock %}

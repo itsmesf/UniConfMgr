@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+
+    <div class="mb-8 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+        <p class="mt-2 text-gray-600">Welcome, {{ user_name }}! Here you can manage conferences and their settings.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <a href="{{ url_for('admin.add_conference') }}" class="block p-6 bg-gray-50 hover:bg-blue-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-200 rounded-full">
+                    <span class="text-2xl">➕</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Add New Conference</h5>
+                    <p class="text-sm text-gray-600">Create and configure a new event.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('admin.view_conference') }}" class="block p-6 bg-gray-50 hover:bg-green-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-200 rounded-full">
+                    <span class="text-2xl">📑</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Manage Conferences</h5>
+                    <p class="text-sm text-gray-600">View, edit, or delete existing events.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('auth.dashboard') }}" class="block p-6 bg-gray-50 hover:bg-gray-200 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-gray-200 rounded-full">
+                    <span class="text-2xl">🏠</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">User Hub</h5>
+                    <p class="text-sm text-gray-600">Switch to the general user view.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('admin.view_all_organizers') }}" class="block p-6 bg-gray-50 hover:bg-yellow-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-yellow-200 rounded-full">
+                    <span class="text-2xl">👥</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">View All Organizers</h5>
+                    <p class="text-sm text-gray-600">See the complete roster across all events.</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('admin.manage_pending_participants') }}" class="block p-6 bg-gray-50 hover:bg-red-100 border border-gray-200 rounded-lg shadow-sm transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 bg-red-200 rounded-full">
+                    <span class="text-2xl">🗑️</span>
+                </div>
+                <div class="ml-4">
+                    <h5 class="text-lg font-bold text-gray-900">Manage Pending Participants</h5>
+                    <p class="text-sm text-gray-600">View and clean up Participant roles with Status 0 (unapproved/pending).</p>
+                </div>
+            </div>
+        </a>
+        </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'layout.html' %}
+
+{% block title %}The Academic Nexus - UniConfMgr{% endblock %}
+
+{% block head %}
+<style>
+    /* Keyframe animations for fade-in and subtle lift */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0; /* Start hidden */
+    }
+    .fade-in-scale {
+        animation: fadeInScale 0.8s ease-out forwards;
+        opacity: 0; /* Start hidden */
+    }
+
+    /* Hero Section Background Styling */
+    .hero-section-bg {
+        /* Placeholder Image - Replace with your own high-resolution image */
+        background-image: url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        z-index: 1;
+        /* UPDATED: Removed max-width, mx-auto, rounded-xl, and mt-6 from this div */
+        /* It will now span full width */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden; /* Ensure image doesn't bleed */
+        min-height: 550px; /* Ensure sufficient height for the full-width hero */
+    }
+    .hero-section-bg::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(17, 24, 39, 0.5); /* Darker Overlay for better contrast */
+        z-index: 2;
+    }
+    .hero-content {
+        position: relative;
+        z-index: 3;
+        color: white;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        /* NEW: Added max-width and mx-auto to hero-content */
+        max-width: 7xl; /* Content centered within max-width */
+        margin: 0 auto;
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%; /* Ensure content takes full width of its container (max-w-7xl) */
+    }
+
+    /* Standardized Button Styling */
+    .btn-primary {
+        background-color: #4F46E5;
+        color: white;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        transform: scale(1);
+    }
+    .btn-primary:hover {
+        background-color: #4338CA;
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn-secondary {
+        background-color: white;
+        color: #4F46E5;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        transform: scale(1);
+        border: 1px solid #4F46E5;
+    }
+    .btn-secondary:hover {
+        background-color: #EEF2FF;
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn-outline {
+        background-color: transparent;
+        color: white;
+        border: 2px solid white;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        transform: scale(1);
+    }
+    .btn-outline:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-center hero-section-bg">
+    <div class="hero-content p-10 md:p-16">
+        <p class="text-xl md:text-2xl text-indigo-300 mb-2 font-semibold tracking-widest uppercase fade-in-up" style="animation-delay: 0.1s;">
+            Unified Conference Management System
+        </p>
+        <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight fade-in-up" style="animation-delay: 0.3s;">
+            THE ACADEMIC NEXUS
+        </h1>
+        <p class="text-lg md:text-xl text-gray-200 mb-10 fade-in-up" style="animation-delay: 0.5s;">
+            Connecting academic conferences across the university network.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 fade-in-scale" style="animation-delay: 0.7s;">
+            <a href="{{ url_for('auth.register') }}" class="w-full sm:w-auto flex items-center justify-center btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 11a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1v-1z" /></svg>
+                Get Started
+            </a>
+            <a href="{{ url_for('conference.explore_conferences') }}" class="w-full sm:w-auto flex items-center justify-center btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                Explore Conferences
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="w-full sm:w-auto flex items-center justify-center btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                Login
+            </a>
+        </div>
+    </div>
+</div>
+
+<section class="py-16 bg-white mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                UniConfMgr: Your All-in-One Conference Command Center 🚀
+            </h2>
+            <p class="mt-4 text-lg text-gray-600">
+                From the first call for papers to the final certificate, every tool you need is right here.
+            </p>
+        </div>
+        <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Easy Paper Submission</h3>
+                        <p class="mt-5 text-base text-gray-600">Authors can easily submit papers, track review status, and upload final camera-ready versions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Streamlined Peer Review</h3>
+                        <p class="mt-5 text-base text-gray-600">Reviewers get access to a structured dashboard to provide feedback and recommendations efficiently.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Secure Online Payments</h3>
+                        <p class="mt-5 text-base text-gray-600">Handle registration fees for authors and participants with an integrated and secure payment gateway.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Digital Certificate Distribution</h3>
+                        <p class="mt-5 text-base text-gray-600">Automatically generate and distribute personalized digital certificates to all participants and contributors.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 003 3z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Dynamic Scheduling</h3>
+                        <p class="mt-5 text-base text-gray-600">Organizers can create and manage detailed event schedules, instantly available to all attendees.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-6">
+                <div class="flow-root bg-white rounded-lg px-6 pb-8 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="-mt-6">
+                        <div><span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </span></div>
+                        <h3 class="mt-8 text-lg font-bold text-gray-900">Comprehensive Admin Control</h3>
+                        <p class="mt-5 text-base text-gray-600">A powerful dashboard for super admins and regular admins to manage users, conferences, and site settings.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-100">
+    <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900">Get Started in 3 Easy Steps</h2>
+        <p class="mt-4 text-lg text-gray-600">Join the academic conversation in a simple, streamlined process.</p>
+    </div>
+    <div class="max-w-5xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-600 text-white font-bold text-2xl mx-auto">1</div>
+            <h3 class="mt-6 text-xl font-bold text-gray-900">Find a Conference</h3>
+            <p class="mt-4 text-gray-600">Browse our list of upcoming conferences and find one that matches your field of interest.</p>
+        </div>
+        <div class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-600 text-white font-bold text-2xl mx-auto">2</div>
+            <h3 class="mt-6 text-xl font-bold text-gray-900">Register & Participate</h3>
+            <p class="mt-4 text-gray-600">Sign up for an account and apply for a role as an author, reviewer, or attendee.</p>
+        </div>
+        <div class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-600 text-white font-bold text-2xl mx-auto">3</div>
+            <h3 class="mt-6 text-xl font-bold text-gray-900">Connect & Collaborate</h3>
+            <p class="mt-4 text-gray-600">Engage with peers, present your research, and contribute to the forefront of academia.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bg-indigo-700">
+    <div class="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
+            <span class="block">Ready to simplify your next academic event?</span>
+            <span class="block text-indigo-200 mt-2">Join UniConfMgr and experience seamless management.</span>
+        </h2>
+        <a href="{{ url_for('auth.register') }}" class="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto">
+            Register for Free
+        </a>
+    </div>
+</section>
+{% endblock %}

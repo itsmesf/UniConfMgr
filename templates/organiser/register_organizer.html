@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Register as Organizer for "{{ conference.title }}"</h2>
+  <form method="POST">
+    <div class="mb-3">
+      <label>Name</label>
+      <input type="text" name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label>University</label>
+      <input type="text" name="university" class="form-control">
+    </div>
+
+    <div class="mb-3">
+      <label>Department</label>
+      <input type="text" name="department" class="form-control">
+    </div>
+
+    <div class="mb-3">
+      <label>Contact Number</label>
+      <input type="text" name="contact" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+
+    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+        <div class="mb-6 border-b pb-4">
+            <h2 class="text-3xl font-bold text-gray-800">My Profile</h2>
+            <p class="mt-1 text-gray-600">View and update your personal information.</p>
+        </div>
+
+        <form action="{{ url_for('profile.view_profile') }}" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ user.name }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 bg-gray-200 leading-tight focus:outline-none focus:shadow-outline" readonly>
+                    <p class="text-xs text-gray-500 mt-1">Email address cannot be changed.</p>
+                </div>
+                <div>
+                    <label for="university_name" class="block text-gray-700 text-sm font-bold mb-2">University Name</label>
+                    <input type="text" id="university_name" name="university_name" value="{{ user.university_name or '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="department" class="block text-gray-700 text-sm font-bold mb-2">Department</label>
+                    <input type="text" id="department" name="department" value="{{ user.department or '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="contact_no" class="block text-gray-700 text-sm font-bold mb-2">Contact Number</label>
+                    <input type="tel" id="contact_no" name="contact_no" value="{{ user.contact_no or '' }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+            <div class="mt-8">
+                <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+        <div class="mb-6 border-b pb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Change Password</h2>
+        </div>
+
+        <form action="{{ url_for('profile.change_password') }}" method="POST">
+            <div class="space-y-4">
+                <div>
+                    <label for="current_password" class="block text-gray-700 text-sm font-bold mb-2">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div>
+                    <label for="new_password" class="block text-gray-700 text-sm font-bold mb-2">New Password</label>
+                    <input type="password" id="new_password" name="new_password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div>
+                    <label for="confirm_password" class="block text-gray-700 text-sm font-bold mb-2">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+            </div>
+            <div class="mt-8">
+                <button type="submit" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Change Password
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

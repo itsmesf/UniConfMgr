@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add New Conference{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-lg mx-auto mt-10">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Create a New Conference</h2>
+        <a href="{{ url_for('admin.view_conference') }}" class="text-sm text-gray-600 hover:text-indigo-600">
+            &larr; Back to Conferences
+        </a>
+    </div>
+
+    <form action="{{ url_for('admin.add_conference') }}" method="POST">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+                <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Conference Title</label>
+                <input type="text" id="title" name="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                <textarea id="description" name="description" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+
+            <div>
+                <label for="start_date" class="block text-gray-700 text-sm font-bold mb-2">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-gray-700 text-sm font-bold mb-2">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="location" class="block text-gray-700 text-sm font-bold mb-2">Location/Venue</label>
+                <input type="text" id="location" name="location" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div>
+                <label for="hosting_university" class="block text-gray-700 text-sm font-bold mb-2">Hosting University</label>
+                <input type="text" id="hosting_university" name="hosting_university" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+
+            <div>
+                <label for="hosting_department" class="block text-gray-700 text-sm font-bold mb-2">Hosting Department</label>
+                <input type="text" id="hosting_department" name="hosting_department" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+
+            <div class="md:col-span-2 border-t pt-4">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Registration Fees</h3>
+            </div>
+            
+            <div>
+                <label for="author_fee" class="block text-gray-700 text-sm font-bold mb-2">Author Fee (Rs)</label>
+                <input type="number" id="author_fee" name="author_fee" step="0.01" min="0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div>
+                <label for="participant_fee" class="block text-gray-700 text-sm font-bold mb-2">Participant Fee (Rs)</label>
+                <input type="number" id="participant_fee" name="participant_fee" step="0.01" min="0" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Add Conference
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

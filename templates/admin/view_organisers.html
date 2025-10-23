@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Organizers for {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h2 class="text-2xl font-bold text-gray-800">Pending Organizer Requests</h2>
+        <a href="{{ url_for('admin.view_conference') }}" class="text-sm text-gray-600 hover:text-indigo-600">
+            &larr; Back to Conferences
+        </a>
+    </div>
+
+    <h3 class="text-xl font-semibold mb-4 text-indigo-700">{{ conference.title }}</h3>
+
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Applicant Name</th>
+                    <th scope="col" class="px-6 py-3">Email</th>
+                    <th scope="col" class="px-6 py-3">University</th>
+                    <th scope="col" class="px-6 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ role.user.name }}</td>
+                    <td class="px-6 py-4">{{ role.user.email }}</td>
+                    <td class="px-6 py-4">{{ role.user.university_name or 'N/A' }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <form action="{{ url_for('admin.role_action', role_id=role.id, action='approve') }}" method="POST" onsubmit="return confirm('Approve {{ role.user.name }} as an Organizer?');">
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded">
+                                    Approve
+                                </button>
+                            </form>
+
+                            <form action="{{ url_for('admin.role_action', role_id=role.id, action='reject') }}" method="POST" onsubmit="return confirm('Reject and remove {{ role.user.name }}?');">
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                        No pending organizer requests for this conference.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

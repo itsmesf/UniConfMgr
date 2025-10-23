@@ -1,0 +1,257 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Tracks & Sessions - {{ conference.title }}{% endblock %}
+
+{% block content %}
+
+<div class="space-y-8">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Structure Management: <span class="text-teal-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-teal-500">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Add New Conference Track</h2>
+
+        <form method="POST" action="{{ url_for('organizer.add_track', conf_id=conference.conference_id) }}" class="space-y-4">
+            <div>
+                <label for="track_name" class="block text-sm font-medium text-gray-700">Track Name (e.g., AI & Machine Learning)</label>
+                <input type="text" id="track_name" name="name" required
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border"
+                       placeholder="Enter track name">
+            </div>
+
+            <div>
+                <label for="track_description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
+                <textarea id="track_description" name="description" rows="2"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border"
+                          placeholder="Briefly describe the track's focus"></textarea>
+            </div>
+
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-150">
+                <i class="fas fa-plus mr-2"></i> Add Track
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Existing Tracks and Sessions</h2>
+
+        {% if tracks %}
+            <div class="space-y-4">
+                {% for track in tracks %}
+                <div class="bg-white rounded-lg shadow-md p-5 border-l-4 border-indigo-500">
+
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-900">{{ track.name }} (ID: {{ track.track_id }})</h3>
+                        <div class="flex space-x-2">
+                            <button type="button"
+                                    class="text-sm text-blue-600 hover:text-blue-800 transition duration-150"
+                                    onclick="openEditTrackModal({{ track.track_id }}, '{{ track.name }}', '{{ track.description | default('', True) }}')">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </button>
+
+                            <form method="POST" action="{{ url_for('organizer.delete_track', conf_id=conference.conference_id, track_id=track.track_id) }}"
+                                  onsubmit="return confirm('Are you sure you want to delete the track: {{ track.name }}? ALL associated sessions will be unassigned/deleted based on your model cascades.')" class="inline-block">
+                                <button type="submit" class="text-sm text-red-600 hover:text-red-800 transition duration-150">
+                                    <i class="fas fa-trash-alt mr-1"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-1">{{ track.description | default('No description provided.', True) }}</p>
+
+                    <div class="mt-4 border-t pt-4">
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">Sessions ({{ track.sessions | length }} defined)</h4>
+
+                        {% if track.sessions %}
+                            <ul class="space-y-2 pl-4 border-l-2 border-gray-200">
+                                {% for session in track.sessions | sort(attribute='schedule_time') %}
+                                <li class="bg-gray-50 p-3 rounded-md flex justify-between items-center text-sm">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">{{ session.name }}</p>
+                                        <p class="text-xs text-gray-600">
+                                            <i class="far fa-clock mr-1"></i> {{ session.schedule_time.strftime('%Y-%m-%d %H:%M') }} |
+                                            <i class="fas fa-map-marker-alt mr-1"></i> {{ session.location | default('TBD', True) }}
+                                            {% if session.session_chair_role %}
+                                                | <i class="fas fa-user-tie mr-1"></i> {{ session.session_chair_role.user.name }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+
+                                    <div class="ml-4 space-x-2">
+                                        <form method="POST" action="{{ url_for('organizer.delete_session', conf_id=conference.conference_id, session_id=session.session_id) }}"
+                                              onsubmit="return confirm('Are you sure you want to delete the session: {{ session.name }}?')" class="inline-block">
+                                            <button type="submit" class="text-red-500 hover:text-red-700 transition duration-150">
+                                                <i class="fas fa-times-circle"></i>
+                                            </button>
+                                        </form>
+
+                                        <button type="button"
+                                                onclick="openSessionModal(
+                                                    {{ track.track_id }},
+                                                    '{{ track.name }}',
+                                                    {{ session.session_id }},
+                                                    '{{ session.name }}',
+                                                    '{{ session.schedule_time.strftime('%Y-%m-%dT%H:%M') }}',
+                                                    '{{ session.location | default('', True) }}',
+                                                    '{{ session.session_chair_role_id | default('', True) }}'
+                                                )"
+                                                class="text-blue-500 hover:text-blue-700 transition duration-150">
+                                            <i class="fas fa-pen-square"></i> Edit
+                                        </button>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-sm text-gray-500">No sessions defined for this track yet.</p>
+                        {% endif %}
+
+                        <button type="button"
+                                onclick="openSessionModal({{ track.track_id }}, '{{ track.name }}')"
+                                class="mt-4 text-sm font-medium text-teal-600 hover:text-teal-800 flex items-center">
+                            <i class="fas fa-calendar-plus mr-1"></i> Add Session to Track
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10 bg-gray-50 rounded-lg border">
+                <p class="text-lg text-gray-600">No tracks have been defined yet. Start by adding one above! ⬆️</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<div id="session-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4 text-gray-800" id="session-modal-title">Add Session</h3>
+
+        <form id="session-form" method="POST" action="{{ url_for('organizer.add_session', conf_id=conference.conference_id) }}" class="space-y-4">
+            <input type="hidden" id="modal_track_id" name="track_id">
+            <div>
+                <label for="session_name" class="block text-sm font-medium text-gray-700">Session Name</label>
+                <input type="text" id="session_name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+            </div>
+
+            <div>
+                <label for="schedule_time" class="block text-sm font-medium text-gray-700">Start Time</label>
+                <input type="datetime-local" id="schedule_time" name="schedule_time" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+            </div>
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">Location/Room</label>
+                <input type="text" id="location" name="location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" placeholder="Room 101, Online, etc.">
+            </div>
+
+            <div>
+                <label for="session_chair_role_id" class="block text-sm font-medium text-gray-700">Session Chair (Optional)</label>
+                <select id="session_chair_role_id" name="session_chair_role_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                    <option value="">-- Select Chair --</option>
+                    {% for role in potential_chairs %}
+                        <option value="{{ role.id }}">{{ role.user.name }} ({{ role.role.name.title() }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex justify-end space-x-4 pt-4">
+                <button type="button" onclick="document.getElementById('session-modal').classList.add('hidden')" class="py-2 px-4 rounded-md text-gray-700 hover:bg-gray-100 transition duration-150">Cancel</button>
+                <button type="submit" class="py-2 px-4 rounded-md text-white bg-teal-600 hover:bg-teal-700 transition duration-150">
+                    Save Session
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="edit-track-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-bold mb-4 text-gray-800">Edit Track</h3>
+
+        <form id="edit-track-form" method="POST" class="space-y-4">
+            <div>
+                <label for="edit_track_name" class="block text-sm font-medium text-gray-700">Track Name</label>
+                <input type="text" id="edit_track_name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+            </div>
+
+            <div>
+                <label for="edit_track_description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="edit_track_description" name="description" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-4 pt-4">
+                <button type="button" onclick="document.getElementById('edit-track-modal').classList.add('hidden')" class="py-2 px-4 rounded-md text-gray-700 hover:bg-gray-100 transition duration-150">Cancel</button>
+                <button type="submit" class="py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition duration-150">
+                    Update Track
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // Unified function to handle both ADD and EDIT session
+    function openSessionModal(trackId, trackName, sessionId = null, sessionName = '', scheduleTime = '', location = '', chairId = '') {
+        const modal = document.getElementById('session-modal');
+        const form = document.getElementById('session-form');
+        const titleElement = document.getElementById('session-modal-title');
+
+        // Always set the track ID
+        document.getElementById('modal_track_id').value = trackId;
+
+        if (sessionId) {
+            // EDIT MODE
+            titleElement.innerText = `Edit Session: ${sessionName}`;
+            // Set action to EDIT route (dynamic URL replacement)
+            // The '0' in the URL is a placeholder to be replaced by the actual sessionId
+            form.action = "{{ url_for('organizer.edit_session', conf_id=conference.conference_id, session_id=0) }}".replace('0', sessionId);
+
+            // Populate fields
+            document.getElementById('session_name').value = sessionName;
+            document.getElementById('schedule_time').value = scheduleTime;
+            document.getElementById('location').value = location;
+            document.getElementById('session_chair_role_id').value = chairId;
+
+        } else {
+            // ADD MODE
+            titleElement.innerText = `Add Session to: ${trackName}`;
+            // Set action to ADD route
+            form.action = "{{ url_for('organizer.add_session', conf_id=conference.conference_id) }}";
+
+            // Clear fields for new session
+            document.getElementById('session_name').value = '';
+            document.getElementById('schedule_time').value = '';
+            document.getElementById('location').value = '';
+            document.getElementById('session_chair_role_id').value = ''; // Reset select
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function openEditTrackModal(trackId, name, description) {
+        const modal = document.getElementById('edit-track-modal');
+        const form = document.getElementById('edit-track-form');
+
+        // 1. Set form action to EDIT route (dynamic URL replacement)
+        // The '0' in the URL is a placeholder to be replaced by the actual trackId
+        form.action = "{{ url_for('organizer.edit_track', conf_id=conference.conference_id, track_id=0) }}".replace('0', trackId);
+
+        // 2. Populate fields with current data
+        document.getElementById('edit_track_name').value = name;
+        document.getElementById('edit_track_description').value = description;
+
+        // 3. Show Modal
+        modal.classList.remove('hidden');
+    }
+</script>
+
+{% endblock %}

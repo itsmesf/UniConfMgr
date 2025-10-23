@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+
+{% block title %}Review Decision - {{ paper.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto bg-white shadow-xl rounded-lg p-8 mt-10">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Final Decision</h1>
+        <a href="{{ url_for('organizer.manage_papers', conf_id=conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Paper List
+        </a>
+    </div>
+
+    <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 rounded-md mb-8 shadow-md">
+        <h2 class="text-2xl font-extrabold text-indigo-800 mb-2">{{ paper.title }}</h2>
+        <div class="grid grid-cols-2 gap-x-8 text-sm text-gray-700">
+            <p><strong>Author:</strong> {{ paper.author_role.user.name }}</p>
+            <p><strong>Track:</strong> {{ paper.track.name if paper.track else 'General' }}</p>
+            <p><strong>Current Status:</strong> <span class="font-medium text-red-700">{{ paper.status.name.replace('_', ' ').title() }}</span></p>
+            <p><strong>Reviews Received:</strong> <span class="font-bold text-green-700">{{ submitted_reviews | length }} / {{ paper.reviews | length }}</span></p>
+        </div>
+    </div>
+
+    {% if is_decision_made %}
+        <div class="p-4 bg-purple-100 border border-purple-400 text-purple-800 rounded-lg text-center mb-6">
+            <p class="font-bold text-lg">FINAL DECISION SET</p>
+            <p class="text-sm mt-1">The paper status is currently: <strong>{{ paper.status.name.title().replace('_', ' ') }}</strong>.</p>
+        </div>
+    {% endif %}
+
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4">Set/Update Final Outcome</h2>
+
+    {% set disabled_attr = 'disabled' if is_locked else '' %}
+    {% set disabled_class = 'bg-gray-200' if is_locked else '' %}
+
+    <form method="POST" action="{{ url_for('organizer.final_decision', conf_id=conference_id, paper_id=paper.paper_id) }}" class="space-y-6">
+
+        <div>
+            <label class="block text-lg font-bold text-gray-700 mb-2">Final Decision</label>
+            <div class="mt-1 flex flex-wrap gap-4 p-3 border rounded-md {{ disabled_class }}">
+
+    {% set current_status_name = paper.status.name %}
+
+    {# NOTE: Explicitly setting the value to the exact string Python expects ('accept', 'reject') #}
+    <label class="inline-flex items-center text-lg cursor-pointer">
+        <input type="radio" name="final_recommendation" value="accept" required {{ disabled_attr }}
+               {% if current_status_name == 'accepted' %} checked {% endif %}
+               class="h-5 w-5 text-green-600 border-gray-300 focus:ring-green-500">
+        <span class="ml-2 font-medium">Accepted</span>
+    </label>
+
+    <label class="inline-flex items-center text-lg cursor-pointer">
+        <input type="radio" name="final_recommendation" value="reject" required {{ disabled_attr }}
+               {% if current_status_name == 'rejected' %} checked {% endif %}
+               class="h-5 w-5 text-red-600 border-gray-300 focus:ring-red-500">
+        <span class="ml-2 font-medium">Rejected</span>
+    </label>
+
+    <label class="inline-flex items-center text-lg cursor-pointer">
+        <input type="radio" name="final_recommendation" value="revision_required" required {{ disabled_attr }}
+               {% if current_status_name == 'revision_required' %} checked {% endif %}
+               class="h-5 w-5 text-yellow-600 border-gray-300 focus:ring-yellow-500">
+        <span class="ml-2 font-medium">Revision Required</span>
+    </label>
+
+</div>
+            </div>
+        <div>
+            <label for="decision_notes" class="block text-lg font-bold text-gray-700 mb-2">Internal Notes (Optional)</label>
+            <textarea id="decision_notes" name="decision_notes" rows="3" {{ disabled_attr }}
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border {{ disabled_class }}"
+                      placeholder="Summary of decision consensus, or notes for the post-acceptance phase."></textarea>
+        </div>
+
+        <div class="pt-4 border-t flex justify-end">
+            {% if is_locked %}
+                <a href="{{ url_for('organizer.view_reviews', conf_id=conference_id, paper_id=paper.paper_id, edit='true') }}"
+                   class="inline-flex justify-center py-3 px-6 border border-transparent shadow-lg text-base font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 transition duration-150">
+                    <i class="fas fa-edit mr-2"></i> Edit Final Decision
+                </a>
+            {% else %}
+                <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-lg text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition duration-150">
+                    <i class="fas fa-gavel mr-2"></i> Finalize and Notify Author
+                </button>
+            {% endif %}
+        </div>
+    </form>
+
+    <hr class="my-8">
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4">Submitted Reviews ({{ submitted_reviews | length }} total)</h2>
+
+    {% for review in submitted_reviews %}
+    <div class="mb-6 border-l-4 p-4 rounded-lg shadow-md
+        {% if review.recommendation.name == 'accept' %}border-green-500 bg-green-50{% elif review.recommendation.name == 'reject' %}border-red-500 bg-red-50{% else %}border-yellow-500 bg-yellow-50{% endif %}">
+
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <p class="font-bold text-lg text-gray-900">Reviewer: Anonymous (ID: {{ review.reviewer_role_id }})</p>
+                <p class="text-sm text-gray-600">Submitted: {{ review.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-lg font-extrabold {% if review.score >= 4 %}text-green-700{% else %}text-red-700{% endif %}">Score: {{ review.score or 'N/A' }}/5</p>
+                <p class="text-sm font-semibold mt-1">Recommendation: {{ review.recommendation.name.title() }}</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="bg-white p-3 rounded-md border">
+                <p class="font-medium text-gray-800 mb-1">Comments to Author:</p>
+                <p class="text-sm italic text-gray-700">{{ review.comments_to_author or 'None provided.' }}</p>
+            </div>
+            <div class="bg-white p-3 rounded-md border">
+                <p class="font-medium text-gray-800 mb-1">Confidential Notes to Organizer:</p>
+                <p class="text-sm italic text-gray-700">{{ review.comments_to_organiser or 'None provided.' }}</p>
+            </div>
+        </div>
+
+    </div>
+    {% else %}
+    <div class="p-4 bg-yellow-50 border border-yellow-300 rounded-md">
+        <p class="text-lg text-yellow-800">No reviews have been fully submitted for this paper yet.</p>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

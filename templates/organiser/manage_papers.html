@@ -1,0 +1,112 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Papers - {{ conference.title }}{% endblock %}
+
+{% block content %}
+
+<div class="space-y-8 p-6 bg-white shadow-xl rounded-lg">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Paper Submissions: <span class="text-indigo-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-gray-50 p-4 rounded-lg shadow-sm flex justify-between items-center border border-gray-200">
+        <p class="text-lg font-medium text-gray-700">Total Submissions: <span class="font-bold text-indigo-700">{{ papers | length }}</span></p>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md shadow-md transition duration-150 cursor-not-allowed opacity-60" disabled>
+            Batch Actions
+        </button>
+    </div>
+
+    {% if papers %}
+    <div class="overflow-x-auto shadow border-b border-gray-200 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Track</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Final File</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviews</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for paper in papers %}
+                <tr>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ paper.paper_id }}</td>
+
+                    <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-gray-900">{{ paper.title }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ paper.track.name if paper.track else 'Unassigned' }}</p>
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ paper.author_role.user.name }}
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        {# Display the paper status using a simple badge #}
+                        {% set status_color = {
+                            'submitted': 'bg-blue-100 text-blue-800',
+                            'under_review': 'bg-yellow-100 text-yellow-800',
+                            'accepted': 'bg-green-100 text-green-800',
+                            'rejected': 'bg-red-100 text-red-800',
+                            'revision_required': 'bg-purple-100 text-purple-800'
+                        }.get(paper.status.name, 'bg-gray-100 text-gray-800') %}
+
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ status_color }}">
+                            {{ paper.status.name.replace('_', ' ').title() }}
+                        </span>
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                        {% if paper.camera_ready_file %}
+                            <a href="{{ url_for('organizer.download_camera_ready', conf_id=conference.conference_id, paper_id=paper.paper_id) }}"
+                               class="text-purple-600 hover:text-purple-800 font-semibold text-xs transition duration-150">
+                                Ready
+                            </a>
+                        {% elif paper.status.name in ['accepted', 'revision_required'] %}
+                            <span class="text-red-600 font-semibold text-xs">Missing</span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {# Count the number of reviews assigned to this paper #}
+                        <span class="font-bold">{{ paper.reviews | length }}</span> assigned
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                        <a href="{{ url_for('organizer.download_paper', conf_id=conference.conference_id, paper_id=paper.paper_id) }}"
+                           class="text-green-600 hover:text-green-900 transition duration-150">
+                            <i class="fas fa-download"></i> Blind
+                        </a>
+
+                        <a href="{{ url_for('organizer.assign_reviewers_view', conf_id=conference.conference_id, paper_id=paper.paper_id) }}"
+                           class="text-indigo-600 hover:text-indigo-900 transition duration-150 font-semibold">
+                            Assign
+                        </a>
+
+                        <a href="{{ url_for('organizer.view_reviews', conf_id=conference.conference_id, paper_id=paper.paper_id) }}"
+                            class="text-blue-600 hover:text-blue-900 transition duration-150 font-semibold">
+                            Decide
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-10 bg-gray-50 rounded-lg border">
+        <p class="text-lg text-gray-600">No papers have been submitted for this conference yet.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

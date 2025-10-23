@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>OTP Verification</h2>
+    <p>Enter the OTP sent to {{ email }}</p>
+    <form method="POST">
+        <input type="text" name="otp" placeholder="OTP" required>
+        <button type="submit">Verify OTP</button>
+    </form>
+</body>
+</html>

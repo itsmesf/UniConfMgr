@@ -1,0 +1,15 @@
+# 1. Environment and Secrets
+.env
+
+# 2. Database Files (Local Development)
+conference.db
+*.db
+identifier.sqlite
+
+# 3. Virtual Environment
+.venv
+
+# 4. Local Utility Scripts (Security/Workflow)
+super_admin.py
+create_admin.py
+test.py

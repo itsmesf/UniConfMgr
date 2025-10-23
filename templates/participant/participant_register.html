@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}Payment Confirmation - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-xl mt-10">
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">Finalize Registration & Payment</h2>
+    <h3 class="text-xl text-indigo-600 mb-6">{{ conference.title }}</h3>
+
+    <div class="border-y border-gray-200 py-4 mb-6">
+        <p class="text-lg font-semibold text-gray-700">Role Confirmed: <span class="text-indigo-700 font-extrabold">Participant</span></p>
+        <div class="flex justify-between items-center mt-3">
+            <p class="text-2xl font-extrabold text-gray-800">Amount Due:</p>
+            <p class="text-4xl font-extrabold text-green-600">${{ conference.participant_fee }}</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('roles.register_participant', conference_id=conference.conference_id) }}">
+
+        <input type="hidden" name="conference_id" value="{{ conference.conference_id }}">
+        <input type="hidden" name="fee_amount" value="{{ conference.participant_fee }}">
+
+        <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-6">
+            <p class="font-semibold text-gray-800 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" /></svg>
+                Secure Checkout via Razorpay (Simulated)
+            </p>
+
+            <div class="space-y-3">
+                <input type="text" placeholder="Card Holder Name (Required)" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 text-sm" required>
+                <input type="text" placeholder="XXXX-XXXX-XXXX-XXXX" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 text-sm" disabled>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-xl transition duration-300 text-lg">
+                Pay ${{ conference.participant_fee }} Now
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

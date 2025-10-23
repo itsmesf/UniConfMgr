@@ -1,0 +1,106 @@
+{% extends 'layout.html' %}
+
+{% block title %}Manage Users - {{ conference.title }}{% endblock %}
+
+{% block content %}
+
+<div class="space-y-8">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            User Management: <span class="text-indigo-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-6">{{ filter_label }}</h2>
+
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="-mb-px flex space-x-8">
+                {% set active_class = "border-indigo-500 text-indigo-600" %}
+                {% set default_class = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" %}
+
+                {# All Approved Users #}
+                <a href="{{ url_for('organizer.view_participants', conf_id=conference.conference_id, role_filter='all') }}"
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ active_class if filter_label == 'All Approved Users' else default_class }}">
+                    All Approved Users
+                </a>
+
+                {# Authors #}
+                <a href="{{ url_for('organizer.view_participants', conf_id=conference.conference_id, role_filter='author') }}"
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ active_class if role_filter == 'author' else default_class }}">
+                    Authors
+                </a>
+
+                {# Reviewers #}
+                <a href="{{ url_for('organizer.view_participants', conf_id=conference.conference_id, role_filter='reviewer') }}"
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ active_class if role_filter == 'reviewer' else default_class }}">
+                    Approved Reviewers
+                </a>
+
+                {# General Participants #}
+                <a href="{{ url_for('organizer.view_participants', conf_id=conference.conference_id, role_filter='participant') }}"
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ active_class if role_filter == 'participant' else default_class }}">
+                    Participants
+                </a>
+
+                {# Link to Pending Reviewers #}
+                <a href="{{ url_for('organizer.manage_reviewers', conf_id=conference.conference_id) }}"
+                   class="py-4 px-1 border-b-2 font-medium text-sm text-yellow-600 hover:text-yellow-800">
+                    <i class="fas fa-hourglass-half mr-1"></i> Pending Reviewers
+                </a>
+            </nav>
+        </div>
+
+        {% if users %}
+        <div class="overflow-x-auto shadow border-b border-gray-200 sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institution</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+
+                        {# ONLY DISPLAY ACTIONS HEADER FOR REVIEWERS #}
+                        {% if role_filter == 'reviewer' %}
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ user.university_name or 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.contact_no or 'N/A' }}</td>
+
+                        {# DISPLAY DELETE BUTTON FOR REVIEWERS #}
+                        {% if role_filter == 'reviewer' %}
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <form method="POST" action="{{ url_for('organizer.remove_approved_reviewer', conf_id=conference.conference_id, user_id=user.user_id) }}"
+                                      onsubmit="return confirm('Are you sure you want to remove this reviewer? This will remove their approved status.')" class="inline-block">
+                                    <button type="submit" class="text-red-600 hover:text-red-900 transition duration-150 p-1 rounded-md bg-red-50 hover:bg-red-100 text-xs font-semibold">
+                                        <i class="fas fa-trash-alt mr-1"></i> Remove Role
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="text-center py-10 bg-gray-50 rounded-lg">
+                <p class="text-lg text-gray-600">No approved users found for the filter: **{{ filter_label }}**.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

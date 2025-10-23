@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% block title %}Upload Schedule - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white shadow-xl rounded-lg p-8 mt-10">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Upload Final Schedule</h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="p-4 rounded-md mb-6 {{ 'bg-green-100 border-green-500' if conference.final_schedule_file else 'bg-yellow-100 border-yellow-500' }} border-l-4 shadow-sm">
+        <p class="text-lg font-semibold {{ 'text-green-800' if conference.final_schedule_file else 'text-yellow-800' }}">
+            Current Status:
+            <strong>{{ conference.final_schedule_file | default('PENDING UPLOAD', true) }}</strong>
+        </p>
+    </div>
+
+    <div class="mb-6 p-4 border rounded-lg bg-gray-50">
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Step 1: Generate and Proof Draft</h2>
+        <p class="text-sm text-gray-600 mb-4">
+            Use the button below to generate the latest program based on current data. Save the resulting page as a PDF using your browser's print function (`Ctrl+P`).
+        </p>
+
+        <a href="{{ url_for('organizer.view_printable_schedule', conf_id=conference.conference_id) }}"
+           target="_blank"
+           class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition duration-150 shadow-md">
+            <i class="fas fa-print mr-2"></i> View/Print Latest Draft PDF
+        </a>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Step 2: Upload Official Copy</h2>
+
+    <form method="POST" action="{{ url_for('organizer.upload_schedule', conf_id=conference.conference_id) }}" enctype="multipart/form-data" class="space-y-6">
+        <div>
+            <label for="schedule_file" class="block text-lg font-bold text-gray-700 mb-2">
+                Select Final Program PDF
+            </label>
+            <p class="text-sm text-gray-600 mb-3">
+                Upload the final, verified PDF document here to make it available for public download.
+            </p>
+            <input type="file" id="schedule_file" name="schedule_file" accept=".pdf" required
+                   class="mt-1 block w-full text-sm text-gray-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-full file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-red-100 file:text-red-700
+                          hover:file:bg-red-200">
+        </div>
+
+        <div class="pt-4 border-t">
+            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 shadow-lg text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition duration-150">
+                <i class="fas fa-cloud-upload-alt mr-2"></i> Upload and Publish Schedule
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit Details - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8 p-6 bg-white shadow-xl rounded-lg">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Edit Conference Details: <span class="text-blue-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('organizer.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <form method="POST" action="{{ url_for('organizer.edit_details', conf_id=conference.conference_id) }}" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">Location/Venue Name</label>
+                <input type="text" id="location" name="location" required
+                       value="{{ conference.location or '' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Conference Title (Fixed)</label>
+                <input type="text" disabled
+                       value="{{ conference.title }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 text-gray-600 shadow-sm p-3 border cursor-not-allowed">
+            </div>
+
+            <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-700">Detailed Description</label>
+                <textarea id="description" name="description" rows="5" required
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border"
+                          placeholder="Provide a detailed overview of the conference theme, goals, and keynote speakers.">{{ conference.description or '' }}</textarea>
+            </div>
+
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                <input type="date" id="start_date" name="start_date" required
+                       value="{{ conference.start_date.strftime('%Y-%m-%d') if conference.start_date else '' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                <input type="date" id="end_date" name="end_date" required
+                       value="{{ conference.end_date.strftime('%Y-%m-%d') if conference.end_date else '' }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+            </div>
+
+        </div>
+
+        <h3 class="text-lg font-semibold text-gray-700 pt-4 border-t">Registration Fees (Numeric Input)</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <label for="author_fee" class="block text-sm font-medium text-gray-700">Author Fee (USD/Currency)</label>
+                <input type="number" step="0.01" min="0" id="author_fee" name="author_fee" required
+                       value="{{ conference.author_fee or 0.00 }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+            </div>
+
+            <div>
+                <label for="participant_fee" class="block text-sm font-medium text-gray-700">Participant/Attendee Fee (USD/Currency)</label>
+                <input type="number" step="0.01" min="0" id="participant_fee" name="participant_fee" required
+                       value="{{ conference.participant_fee or 0.00 }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+            </div>
+        </div>
+
+        <div class="pt-4 flex justify-end">
+            <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-150">
+                <i class="fas fa-save mr-2"></i> Save & Complete Details
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

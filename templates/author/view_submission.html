@@ -1,0 +1,182 @@
+{% extends 'layout.html' %}
+
+{% block title %}Submission Status - {{ paper.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-8 mt-10 border border-gray-100">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Paper Status: <span class="text-indigo-600">{{ paper.title }}</span>
+        </h1>
+        <a href="{{ url_for('author.dashboard', conf_id=conference.conference_id) }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    {% set status_name = paper.status.name %}
+    {% set status_display = status_name.replace('_', ' ').title() %}
+    {% set status_color = {
+        'accepted': 'bg-green-100 border-green-500 text-green-800',
+        'revision_required': 'bg-yellow-100 border-yellow-500 text-yellow-800',
+        'rejected': 'bg-red-100 border-red-500 text-red-800',
+        'submitted': 'bg-blue-100 border-blue-500 text-blue-800',
+        'under_review': 'bg-purple-100 border-purple-500 text-purple-800'
+    }.get(status_name, 'bg-gray-100 border-gray-500 text-gray-800') %}
+
+    <div class="p-5 border-l-4 rounded-lg shadow-md {{ status_color }} mb-8">
+        <p class="text-xl font-extrabold">Decision: {{ status_display }}</p>
+        <p class="text-sm mt-1">Track: {{ paper.track.name }} | Submitted: {{ paper.created_at.strftime('%Y-%m-%d') }}</p>
+    </div>
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4">Next Steps</h2>
+
+    {% if status_name == 'accepted' or status_name == 'revision_required' %}
+
+        <div class="p-5 bg-green-50 border border-green-300 rounded-lg space-y-4">
+
+            <!-- Conditional Congratulatory Message -->
+            {% if status_name == 'accepted' %}
+                <p class="text-lg font-bold text-green-800">
+                    Congratulations! Your paper has been {{ status_display }}.
+                </p>
+            {% elif status_name == 'revision_required' %}
+                <p class="text-lg font-bold text-yellow-800">
+                    Your paper has been conditionally accepted ({{ status_display }}).
+                </p>
+            {% endif %}
+
+            <h3 class="font-semibold text-gray-700">Final Actions Checklist</h3>
+
+            {% if status_name == 'revision_required' %}
+                <h4 class="text-md font-semibold text-red-700">1. Action Required: Upload Revised BLIND Copy</h4>
+                <p class="text-sm text-gray-600 mb-2 border-l-2 pl-2 border-yellow-500">
+                    You must upload the revised manuscript for potential re-review before proceeding to payment.
+                </p>
+                <form method="POST" action="{{ url_for('author.upload_revised_blind_copy', conf_id=conference.conference_id, paper_id=paper.paper_id) }}" enctype="multipart/form-data" class="space-y-3 p-4 border rounded-md bg-white">
+                    <label for="revised_blind_file" class="block text-sm font-medium text-red-800">
+                        Revised Blind Manuscript (PDF Only)
+                    </label>
+                    <input type="file" id="revised_blind_file" name="revised_blind_file" accept=".pdf" required class="block w-full text-sm text-gray-500 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-red-50 hover:file:bg-red-100">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition duration-150">
+                        <i class="fas fa-upload mr-1"></i> Submit Revised Copy
+                    </button>
+                </form>
+
+                <div class="p-3 bg-white border border-gray-300 rounded-md">
+                    <p class="text-md font-semibold text-gray-600">
+                        2. Finalize Registration & Payment: <span class="font-normal text-red-600">LOCKED 🔒</span>
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">Payment will be required only after the revised manuscript is fully accepted.</p>
+                </div>
+
+            {% elif status_name == 'accepted' %}
+                <h4 class="text-md font-semibold text-gray-700">1. Camera-Ready Manuscript</h4>
+
+                {% if not paper.camera_ready_file %}
+                    <form method="POST" action="{{ url_for('author.upload_camera_ready', conf_id=conference.conference_id, paper_id=paper.paper_id) }}" enctype="multipart/form-data" class="space-y-3 p-4 border rounded-md bg-white">
+                        <label for="camera_ready_file" class="block text-sm font-medium text-blue-800">Final Manuscript (PDF Only)</label>
+                        <input type="file" id="camera_ready_file" name="camera_ready_file" accept=".pdf" required class="block w-full text-sm text-gray-500 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 hover:file:bg-blue-100">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition duration-150">
+                            <i class="fas fa-upload mr-1"></i> Upload Final Copy
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="p-3 bg-white border border-indigo-300 rounded-md flex justify-between items-center">
+                        <p class="text-md font-semibold text-indigo-800">
+                            1. Camera-Ready File: <span class="font-normal text-green-600">Submitted ✅</span>
+                        </p>
+                        <a href="#" class="text-sm text-indigo-600 hover:underline">View File</a>
+                    </div>
+                {% endif %}
+
+                {% if is_author_registered %}
+                    <div class="p-3 bg-white border border-green-500 rounded-md">
+                        <p class="text-md font-semibold text-green-800">
+                            2. Registration & Payment: <span class="font-normal">Confirmed ✅</span>
+                        </p>
+                        <p class="text-xs text-gray-600 mt-1">Your paper (ID: {{ paper.paper_id }}) is secured in the program.</p>
+                    </div>
+                {% else %}
+                    <h4 class="text-md font-semibold text-red-700">2. Action Required: Finalize Author Payment (Fee: Rs{{ conference.author_fee }})</h4>
+                    <form method="POST" action="{{ url_for('author.process_author_payment', conf_id=conference.conference_id, paper_id=paper.paper_id) }}" class="inline-block">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition duration-150">
+                            Finalize Author Registration and Payment
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+
+        </div>
+
+    {% elif status_name == 'rejected' %}
+
+        <div class="p-5 bg-red-50 border border-red-300 rounded-lg space-y-4 text-center">
+            <p class="text-lg font-bold text-red-800">
+                Your paper was unfortunately rejected.
+            </p>
+            <p class="text-md text-gray-700">
+                However, you may still attend the conference as a participant.
+            </p>
+
+            <a href="{{ url_for('roles.register_as_participant_after_rejection', conf_id=conference.conference_id) }}"
+               class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md text-sm font-semibold transition duration-150">
+                Register as Participant
+            </a>
+        </div>
+
+    {% else %}
+        <div class="p-5 bg-blue-50 border border-blue-300 rounded-lg">
+            <p class="text-lg font-bold text-blue-800">
+                Decision pending.
+            </p>
+            <p class="text-sm mt-1 text-gray-700">The review process is currently underway. Check back later for the official decision.</p>
+        </div>
+
+    {% endif %}
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mt-8 mb-4">Reviewer Feedback</h2>
+    
+    {% set completed_reviews = paper.reviews | selectattr('recommendation', 'is_submitted') | list %}
+
+    {% if completed_reviews %}
+        <div class="space-y-4">
+            {% for review in completed_reviews %}
+            <div class="p-4 bg-gray-100 border-l-4 border-gray-400 rounded-lg shadow-sm">
+                <p class="font-bold text-md text-gray-800 mb-2 flex justify-between items-center">
+                    Reviewer Feedback #{{ loop.index }}
+                    <span class="text-sm font-semibold text-gray-600">
+                        Recommendation: {{ review.recommendation.name.title() }}
+                    </span>
+                </p>
+                
+                <div class="bg-white p-3 rounded-md border border-gray-300">
+                    <p class="font-medium text-gray-700 mb-1">Comments for Author:</p>
+                    <p class="text-sm italic text-gray-600">
+                        {{ review.comments_to_author or 'No specific comments provided for the author.' }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="p-4 bg-blue-50 border border-blue-300 rounded-md">
+            <p class="text-md text-blue-800">Reviewer feedback is not yet available. The paper is currently {{ paper.status.name.replace('_', ' ') }}.</p>
+        </div>
+    {% endif %}
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mt-8 mb-4">Original Submission Details</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 p-4 rounded-md">
+            <p class="font-medium text-gray-700">Abstract:</p>
+            <p class="text-sm text-gray-600 mt-1">{{ paper.abstract or 'N/A' }}</p>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-md">
+            <p class="font-medium text-gray-700">Keywords:</p>
+            <p class="text-sm text-gray-600 mt-1">{{ paper.keywords or 'N/A' }}</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

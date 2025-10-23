@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome, {{ session.user_name }}!</h1>
+        <p class="mt-2 text-gray-600">This is your central hub. Below you'll find all the conferences you are participating in and your role for each.</p>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">My Conference Roles</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {# --- Loop through the roles passed from the Flask route --- #}
+            {% for role in roles %}
+            <div class="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900">{{ role.conference.title }}</h3>
+                    
+                    <p class="text-sm text-gray-500 mt-1">
+                        {{ role.conference.start_date.strftime('%B %d, %Y') }} - {{ role.conference.end_date.strftime('%B %d, %Y') }}
+                    </p>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm text-gray-600">Your Role:</p>
+                        {# --- Dynamically style the role badge --- #}
+                        {% set role_colors = {
+                            'author': 'bg-blue-100 text-blue-800',
+                            'reviewer': 'bg-green-100 text-green-800',
+                            'organizer': 'bg-purple-100 text-purple-800',
+                            'participant': 'bg-gray-100 text-gray-800'
+                        } %}
+                        <span class="text-xs font-medium px-2.5 py-0.5 rounded-full {{ role_colors.get(role.role.name, 'bg-gray-100 text-gray-800') }}">
+                            {{ role.role.name.title() }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-2">
+                        <p class="text-sm text-gray-600">Status:</p>
+                        {% if role.status == 1 %}
+                            <span class="text-xs font-medium text-green-800">Approved</span>
+                        {% else %}
+                            <span class="text-xs font-medium text-yellow-800">Pending Approval</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    {# --- START: Priority-based Action Button Logic --- #}
+                    {% if role.status == 1 %}
+                        {% if role.role.name == 'organizer' %}
+                            {# 1. Highest Priority: Organizer Dashboard #}
+                            <a href="{{ url_for('organizer.dashboard', conf_id=role.conference_id) }}" class="w-full block text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                                Go to Organizer Dashboard
+                            </a>
+                        {% elif role.role.name == 'reviewer' %}
+                            {# 2. Reviewer Dashboard (Assuming 'reviewer.dashboard') #}
+                            <a href="{{ url_for('reviewer.dashboard', conf_id=role.conference_id) }}" class="w-full block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                                Go to Reviewer Dashboard
+                            </a>
+                        {% elif role.role.name == 'author' %}
+                            {# 3. Author Dashboard (Using author.author_dashboard) #}
+                            <a href="{{ url_for('author.dashboard', conf_id=role.conference_id) }}" class="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                                Go to Author Dashboard
+                            </a>
+                        {% else %}
+                            {# 4. Default/Participant Dashboard (Using participant.participant_dashboard) #}
+                            <a href="{{ url_for('participant.participant_dashboard', conf_id=role.conference_id) }}" class="w-full block text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                                View Conference Hub
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        {# If role is not approved #}
+                        <button class="w-full bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded cursor-not-allowed" disabled>
+                            Awaiting Approval
+                        </button>
+                    {% endif %}
+                    {# --- END: Priority-based Action Button Logic --- #}
+                </div>
+            </div>
+            {% else %}
+            {# --- This message shows if the user has no roles --- #}
+            <div class="md:col-span-2 lg:col-span-3 bg-white p-8 rounded-lg shadow-md text-center">
+                <h3 class="text-xl font-bold text-gray-700">You're not signed up for any conferences yet.</h3>
+                <p class="mt-2 text-gray-500">Why not take a look at our upcoming events?</p>
+                <a href="{{ url_for('conference.explore_conferences') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Explore Conferences
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'layout.html' %}
+
+{% block title %}Reviewer Dashboard - {{ conference.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8 p-6 bg-white shadow-xl rounded-lg">
+
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Reviewer Dashboard: <span class="text-green-600">{{ conference.title }}</span>
+        </h1>
+        <a href="{{ url_for('auth.dashboard') }}" class="text-sm text-gray-500 hover:text-indigo-600 transition duration-150 flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to User Hub
+        </a>
+    </div>
+
+    <div class="bg-green-50 p-4 rounded-lg border border-green-300 shadow-sm flex justify-between items-center">
+        <div>
+            <p class="text-lg font-medium text-green-800">
+                Welcome, {{ session.user_name }}. You have {{ assigned_reviews | length }} paper(s) assigned for review.
+            </p>
+        </div>
+
+        <a href="{{ url_for('schedule.get_public_schedule_pdf', conf_id=conference.conference_id) }}"
+           class="bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm transition duration-150">
+            <i class="fas fa-file-pdf mr-1"></i> Download Program
+        </a>
+        </div>
+
+    <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2">Assigned Papers</h2>
+
+    {% if assigned_reviews %}
+    <div class="overflow-x-auto shadow border-b border-gray-200 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paper ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Track</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review Status</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for review in assigned_reviews %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ review.paper.paper_id }}</td>
+
+                    <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-gray-900">{{ review.paper.title }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ review.paper.track.name if review.paper.track else 'General' }}</p>
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        {% if review.recommendation %}
+                            {# Review is complete #}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Complete
+                            </span>
+                        {% else %}
+                            {# Review is pending #}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Pending
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <a href="{{ url_for('reviewer.view_review_form', conf_id=conference.conference_id, review_id=review.review_id) }}"
+                           class="text-indigo-600 hover:text-indigo-900 transition duration-150 font-semibold">
+                            {% if review.recommendation %}
+                                <i class="fas fa-eye mr-1"></i> View Review
+                            {% else %}
+                                <i class="fas fa-pencil-alt mr-1"></i> Start Review
+                            {% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-10 bg-gray-50 rounded-lg border">
+        <p class="text-lg text-gray-600">You have no papers currently assigned for review. Thank you for your service!</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
