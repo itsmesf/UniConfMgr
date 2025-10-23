@@ -8,6 +8,7 @@ identifier.sqlite
 
 # 3. Virtual Environment
 .venv
+venv
 
 # 4. Local Utility Scripts (Security/Workflow)
 super_admin.py

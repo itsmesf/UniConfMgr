@@ -10,10 +10,9 @@ from routes.organizer_routes import organizer_bp
 from routes.reviewer_routes import reviewer_bp
 from routes.author_routes import author_bp
 from routes.publish_schedule_pdf import schedule_bp
-from extensions import db, mail
+from extensions import db
 from datetime import datetime,date
 from flask_migrate import Migrate
-
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object(Config)
@@ -24,7 +23,6 @@ def inject_now():
 
 # Initialize extensions
 db.init_app(app)
-mail.init_app(app)
 migrate = Migrate(app, db)
 
 # Register blueprints

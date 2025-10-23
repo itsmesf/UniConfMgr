@@ -1,5 +1,3 @@
-# profile_bp.py
-# profile_bp.py
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 # ADD these imports for password hashing and checking

@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from models import User,ConferenceRole,Conference # UserRole enum is no longer needed here for auth logic
-from extensions import db,mail
+from extensions import db
 from functools import wraps
-from flask_mail import Message,current_app
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Email, Mail
+import os
 TOKEN_EXPIRATION_SEC = 1800
 
 
@@ -88,22 +90,42 @@ def add_admin():
 
         # --- SEND THE WELCOME EMAIL ---
         try:
-            msg = Message(
-                subject="Your Admin Account has been Created!",
-                sender=('Conference Manager', current_app.config['MAIL_USERNAME']), # Sender name
-                recipients=[email]
-            )
-            # Use a template for a nice HTML email
-            msg.html = render_template(
+            # 1. Prepare the email content and recipient
+
+            # Get the HTML content from the Jinja template
+            html_content = render_template(
                 'emails/new_admin_welcome.html',
                 name=name,
                 email=email,
                 password=password
             )
-            mail.send(msg)
-            flash("Admin created successfully and a welcome email has been sent!", "success")
+
+            # NOTE: The sender email must be verified in your SendGrid account!
+            sender_email = current_app.config['MAIL_USERNAME']  # This should be the verified SendGrid address
+
+            # 2. Build the SendGrid Message object
+            message = Mail(
+                from_email=Email(sender_email, "Conference Manager"),  # Correct way
+                to_emails=email,
+                subject='Your Admin Account has been Created!',
+                html_content=html_content
+            )
+
+            # 3. Send the message using the API key
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+
+            # Optional: Log success based on API response code (202 is accepted)
+            if response.status_code == 202:
+                flash("Admin created successfully and a welcome email has been sent!", "success")
+            else:
+                # SendGrid accepted the request but returned an unexpected status code
+                flash(f"Admin created, but SendGrid returned status {response.status_code}. Email may not have sent.",
+                      "warning")
 
         except Exception as e:
+            # This catches API connection errors, authentication errors, etc.
+            print(f"SendGrid Error: {e}")
             flash(f"Admin created, but failed to send email. Error: {e}", "warning")
 
         return redirect(url_for("auth.view_admins"))
@@ -255,27 +277,56 @@ def register():
     # For a GET request, just show the registration page
     return render_template("register.html")
 
+
+
 @auth_bp.route("/reset_password", methods=['GET', 'POST'])
 def reset_password_request():
     """Route for users to request a password reset link."""
     if request.method == 'POST':
         email = request.form.get('email')
         user = User.query.filter_by(email=email).first()
+
         if user:
-            token = user.get_reset_token()
-            msg = Message(
-                'Password Reset Request',
-                sender=('ConfMgr', current_app.config['MAIL_USERNAME']),
-                recipients=[user.email]
-            )
-            msg.html = render_template(
-                'emails/reset_password.html',
-                user=user,
-                token=token
-            )
-            mail.send(msg)
-            flash('An email has been sent with instructions to reset your password.', 'info')
-            return redirect(url_for('auth.login'))
+            try:
+                # 1. Generate Token and HTML Content
+                token = user.get_reset_token()
+
+                html_content = render_template(
+                    'emails/reset_password.html',
+                    user=user,
+                    token=token
+                )
+
+                # NOTE: The sender must be the email address verified with SendGrid
+                sender_email = current_app.config['MAIL_USERNAME']
+
+                # 2. Build the SendGrid Message object
+                message = Mail(
+                    from_email=(sender_email,"ConfMgr"),
+                    to_emails=user.email,
+                    subject='Password Reset Request',
+                    html_content=html_content
+                )
+
+                # 3. Send the message using the API key
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                response = sg.send(message)
+
+                # Check if SendGrid accepted the request (Status 202 is success)
+                if response.status_code == 202:
+                    flash('An email has been sent with instructions to reset your password.', 'info')
+                else:
+                    # Log the non-202 status for debugging, but treat as an application issue
+                    print(f"SendGrid API Error: Unexpected status code {response.status_code}")
+                    flash('Failed to send email. Please try again or check logs.', 'warning')
+
+                return redirect(url_for('auth.login'))
+
+            except Exception as e:
+                # This catches errors like invalid API key, network issues, etc.
+                print(f"SendGrid Integration Error: {e}")
+                flash('An unexpected error occurred while processing your request.', 'danger')
+                return redirect(url_for('auth.login'))
         else:
             flash('No account found with that email address.', 'warning')
 
@@ -321,19 +372,16 @@ def verify_email(token):
 
 
 def send_verification_email(user):
-    """Generates a token and sends the verification email to the user."""
+    """Generates a token and sends the verification email to the user via SendGrid API."""
 
-    # Use the User model's method to generate a token (implement this next)
     token = user.get_verification_token()
-
-    msg = Message('Verify Your Email Address for UniConfMgr',
-                  sender=current_app.config['MAIL_USERNAME'],
-                  recipients=[user.email])
+    sender_email = current_app.config['MAIL_USERNAME']  # Verified SendGrid Sender
 
     # Construct the verification link
     verify_url = url_for('auth.verify_email', token=token, _external=True)
 
-    msg.body = f"""
+    # Compose the plain text body (SendGrid prefers plain text or HTML content)
+    body_content = f"""
 Dear {user.name},
 
 Thank you for registering with UniConfMgr - The Academic Nexus.
@@ -347,32 +395,44 @@ If you did not register for this service, please ignore this email.
 
 The UniConfMgr Team
 """
+    # 1. Build the SendGrid Message object
+    message = Mail(
+        from_email=(sender_email,"UniConfMgr"),
+        to_emails=user.email,
+        subject='Verify Your Email Address for UniConfMgr',
+        plain_text_content=body_content  # Using plain_text_content
+    )
+
+    # 2. Send the message using the API key
     try:
-        mail.send(msg)
-        return True
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+
+        # Check for successful API acceptance (HTTP Status 202)
+        if 200 <= response.status_code < 300:
+            return True
+        else:
+            print(f"SENDGRID API FAILED: Status {response.status_code}")
+            return False
+
     except Exception as e:
-        print(f"MAIL SENDING FAILED: {e}")
+        print(f"SENDGRID API ERROR: {e}")
         return False
+
+
 
 
 def send_rejection_email(author_email: str, author_name: str, paper_title: str, conference: Conference):
     """
-    Generates and sends a rejection notification using pre-fetched data.
-    This prevents the DetachedInstanceError caused by deleting the author_role record.
+    Generates and sends a rejection notification using the SendGrid API.
     """
 
-    # Check if we have an email address to send to
     if not author_email:
         print(f"REJECTION MAIL FAILED: Author email not found for paper '{paper_title}'.")
         return False
 
-    # 1. Compose the message
-    msg = Message(f'Decision on Paper: Regrettably Rejected - {conference.title}',
-                  sender=current_app.config['MAIL_USERNAME'],
-                  recipients=[author_email])
-
-    # 2. Construct the body (using the verified data)
-    msg.body = f"""
+    # 1. Compose the plain text message body
+    body_content = f"""
 Dear {author_name},
 
 The final decision on your paper, "{paper_title}", submitted to the {conference.title}, has been concluded.
@@ -383,12 +443,31 @@ You may still register to attend the conference as a participant via the public 
 
 The UniConfMgr Team
 """
+    sender_email = current_app.config['MAIL_USERNAME']  # Verified SendGrid Sender
+
+    # 2. Build the SendGrid Message object
+    message = Mail(
+        from_email=(sender_email,"UniConfMgr"),
+        to_emails=author_email,
+        subject=f'Decision on Paper: Regrettably Rejected - {conference.title}',
+        plain_text_content=body_content
+    )
+
     # 3. Send the message within the application context
     try:
         with current_app.app_context():
-            mail.send(msg)
-        return True
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+
+            response = sg.send(message)
+
+            # Check for successful API acceptance
+            if 200 <= response.status_code < 300:
+                return True
+            else:
+                print(f"SENDGRID API FAILED: Status {response.status_code}")
+                return False
+
     except Exception as e:
-        # Log the specific SMTP error
-        print(f"REJECTION MAIL FAILED (SMTP Error): {e}")
+        # Log the specific API error
+        print(f"REJECTION MAIL FAILED (API Error): {e}")
         return False
