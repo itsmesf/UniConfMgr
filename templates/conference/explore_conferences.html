@@ -3,60 +3,70 @@
 {% block title %}Explore Conferences{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-extrabold text-indigo-800 text-center mb-8">Explore University Conferences</h1>
+{# Adjusted container padding to bring content closer to the top #}
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-4xl font-extrabold text-indigo-800 text-center mb-4">Explore University Conferences</h1>
 
-    <div class="mb-8 p-4 bg-gray-100 rounded-xl shadow-lg">
-        <h2 class="text-xl font-semibold text-gray-700 mb-3">Filter Conferences</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {# --- START OF COLLAPSIBLE FILTER SECTION --- #}
+    {# Reduced bottom margin to mb-1 to tighten the space to the tabs below #}
+    <div class="mb-1 p-0 bg-transparent rounded-none shadow-none">
 
-            <div>
-                <label for="searchInput" class="block text-sm font-medium text-gray-700">Search by Title/Location</label>
-                <input type="text" id="searchInput" oninput="filterConferences()" placeholder="Start typing..."
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
+        {# COLLAPSIBLE HEADER / TOGGLE BUTTON: ADDED TEXT AND ICON BACK #}
+        <button id="filterToggle" onclick="toggleFilter()"
+                class="w-full flex justify-between items-center text-lg font-semibold text-gray-700 hover:text-indigo-600 transition duration-150 focus:outline-none">
+            Filter Conferences
+            <i id="filterIcon" class="fas fa-chevron-down text-sm"></i>
+        </button>
 
-            <div>
-                <label for="universityFilter" class="block text-sm font-medium text-gray-700">Filter by University</label>
-                <select id="universityFilter" onchange="filterConferences()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="all">All Universities</option>
-                    {# Collect unique university names for the dropdown #}
-                    {% set university_names = [] %}
-                    {% for conf_list in conferences.values() %}
-                        {% for conf in conf_list %}
-                            {# FIX: Use hosting_university directly from Conference model #}
-                            {% if conf.hosting_university and conf.hosting_university not in university_names %}
-                                {% set _ = university_names.append(conf.hosting_university) %}
-                            {% endif %}
+        {# COLLAPSIBLE BODY - The element manipulated by JavaScript #}
+        <div id="filterBody" class="filter-content">
+            <div id="filterInner" class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4 border-gray-300">
+
+                <div>
+                    <label for="searchInput" class="block text-sm font-medium text-gray-700">Search by Title/Location</label>
+                    <input type="text" id="searchInput" oninput="filterConferences()" placeholder="Start typing..."
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="universityFilter" class="block text-sm font-medium text-gray-700">Filter by University</label>
+                    <select id="universityFilter" onchange="filterConferences()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="all">All Universities</option>
+                        {% set university_names = [] %}
+                        {% for conf_list in conferences.values() %}
+                            {% for conf in conf_list %}
+                                {% if conf.hosting_university and conf.hosting_university not in university_names %}
+                                    {% set _ = university_names.append(conf.hosting_university) %}
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
-                    {% for name in university_names %}
-                        <option value="{{ name | lower }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label for="departmentFilter" class="block text-sm font-medium text-gray-700">Filter by Department</label>
-                <select id="departmentFilter" onchange="filterConferences()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="all">All Departments</option>
-                    {# Collect unique department names #}
-                    {% set department_names = [] %}
-                    {% for conf_list in conferences.values() %}
-                        {% for conf in conf_list %}
-                            {# FIX: Use hosting_department directly from Conference model #}
-                            {% if conf.hosting_department and conf.hosting_department not in department_names %}
-                                {% set _ = department_names.append(conf.hosting_department) %}
-                            {% endif %}
+                        {% for name in university_names %}
+                            <option value="{{ name | lower }}">{{ name }}</option>
                         {% endfor %}
-                    {% endfor %}
-                    {% for name in department_names %}
-                        <option value="{{ name | lower }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="departmentFilter" class="block text-sm font-medium text-gray-700">Filter by Department</label>
+                    <select id="departmentFilter" onchange="filterConferences()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2.5 border focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="all">All Departments</option>
+                        {% set department_names = [] %}
+                        {% for conf_list in conferences.values() %}
+                            {% for conf in conf_list %}
+                                {% if conf.hosting_department and conf.hosting_department not in department_names %}
+                                    {% set _ = department_names.append(conf.hosting_department) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {% for name in department_names %}
+                            <option value="{{ name | lower }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
         </div>
     </div>
+    {# --- END OF COLLAPSIBLE FILTER SECTION --- #}
+
     <div class="mb-6 border-b border-gray-200">
         <nav class="flex space-x-8" aria-label="Tabs">
             <button onclick="changeTab('upcoming')" id="tab-upcoming" class="tab-btn text-indigo-600 border-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg">
@@ -80,7 +90,6 @@
                 {% for conf in conferences[category] %}
                 <div class="conference-card bg-white rounded-xl shadow-xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 transition duration-300 hover:shadow-2xl border-l-4
                     {% if category == 'upcoming' %}border-indigo-600{% elif category == 'ongoing' %}border-green-600{% else %}border-gray-400{% endif %}"
-                     {# FIX: Use direct hosting columns #}
                      data-university="{{ conf.hosting_university | lower or 'n/a' }}"
                      data-department="{{ conf.hosting_department | lower or 'n/a' }}"
                      data-searchable="{{ conf.title | lower }} {{ conf.location | lower }}">
@@ -115,8 +124,58 @@
     {% endfor %}
     </div>
 
+<style>
+    /* Base state: Hidden, but with a transition property */
+    .filter-content {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    }
+
+    /* This class is applied by JavaScript when the filter is OPEN */
+    .filter-content.active {
+        opacity: 1;
+        /* max-height is calculated by JS */
+    }
+</style>
+
 <script>
     const tabs = ['upcoming', 'ongoing', 'past'];
+
+    // --- COLLAPSIBLE FUNCTION ---
+    function toggleFilter() {
+        const filterBody = document.getElementById('filterBody');
+        const filterIcon = document.getElementById('filterIcon');
+
+        // Check if the element is currently collapsed (maxHeight is '0px')
+        const isCollapsed = filterBody.style.maxHeight === '0px';
+
+        if (isCollapsed) {
+            // EXPAND: Set maxHeight to the calculated height, and add 'active' class
+            filterBody.style.maxHeight = filterBody.scrollHeight + "px";
+            filterBody.classList.add('active');
+            filterIcon.classList.remove('fa-chevron-down');
+            filterIcon.classList.add('fa-chevron-up');
+        } else {
+            // COLLAPSE:
+            // 1. Temporarily set maxHeight to its current scrollHeight
+            filterBody.style.maxHeight = filterBody.scrollHeight + "px";
+
+            // 2. Use a tiny delay before setting to 0 to ensure the transition fires
+            setTimeout(() => {
+                filterBody.style.maxHeight = '0px';
+                filterBody.classList.remove('active');
+            }, 10);
+
+            filterIcon.classList.remove('fa-chevron-up');
+            filterIcon.classList.add('fa-chevron-down');
+        }
+
+        filterConferences();
+    }
+    // ----------------------------
+
 
     function changeTab(selectedTab) {
         tabs.forEach(tab => {
@@ -133,14 +192,12 @@
                 tabContent.classList.add('hidden');
             }
         });
-        // Rerun filter when tab changes
         filterConferences();
     }
 
     function filterConferences() {
-        // Find the active tab based on the active class
         const activeTabElement = document.querySelector('.tab-btn.text-indigo-600');
-        if (!activeTabElement) return; // Exit if no tab is active
+        if (!activeTabElement) return;
 
         const activeTab = activeTabElement.id.replace('tab-', '');
         const searchValue = document.getElementById('searchInput').value.toLowerCase();
@@ -151,29 +208,22 @@
         let matchCount = 0;
 
         cards.forEach(card => {
-            // Updated to use the new hosting attributes
             const cardUniversity = card.getAttribute('data-university');
             const cardDepartment = card.getAttribute('data-department');
             const cardSearchable = card.getAttribute('data-searchable');
 
-            // 1. Check Text Search
             const textMatch = cardSearchable.includes(searchValue);
-
-            // 2. Check University Filter
             const universityMatch = universityValue === 'all' || cardUniversity === universityValue;
-
-            // 3. Check Department Filter
             const departmentMatch = departmentValue === 'all' || cardDepartment === departmentValue;
 
             if (textMatch && universityMatch && departmentMatch) {
-                card.style.display = 'flex'; // Show card
+                card.style.display = 'flex';
                 matchCount++;
             } else {
-                card.style.display = 'none'; // Hide card
+                card.style.display = 'none';
             }
         });
 
-        // Toggle "No Matches" message
         if (noMatchesMessage) {
             if (matchCount === 0 && cards.length > 0) {
                 noMatchesMessage.style.display = 'block';
@@ -185,8 +235,13 @@
 
     // Initialize the page on load
     document.addEventListener('DOMContentLoaded', () => {
-        // Find the initially active tab and run filters
-        const initialTab = document.querySelector('.tab-btn.text-indigo-600').id.replace('tab-', '');
+        const filterBody = document.getElementById('filterBody');
+
+        // Force the element to the collapsed state immediately after rendering.
+        // This ensures the filter starts CLOSED on page load.
+        filterBody.style.maxHeight = '0px';
+        filterBody.classList.remove('active');
+
         filterConferences();
     });
 </script>
