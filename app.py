@@ -16,14 +16,12 @@ from flask_migrate import Migrate
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object(Config)
-
-@app.context_processor
-def inject_now():
-    return {'now': datetime.now}
-
 # Initialize extensions
 db.init_app(app)
+
 migrate = Migrate(app, db)
+
+from models import *
 
 # Register blueprints
 app.register_blueprint(auth_bp)
@@ -37,12 +35,17 @@ app.register_blueprint(schedule_bp)
 app.register_blueprint(reviewer_bp)
 app.register_blueprint(author_bp, url_prefix='/author')
 
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now}
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+    #db.create_all()
 
 def is_submitted_test(value):
     """Checks if a review recommendation is submitted (i.e., not None)."""
