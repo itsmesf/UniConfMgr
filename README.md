@@ -3,7 +3,7 @@
 **UniConfMgr (Unified Conference Manager)** is a functional web platform built with **Flask** and **SQLAlchemy** designed to centralize the management of academic conferences across university departments.
 ## Application Preview
 
-![UniConfMgr Application Screenshot - Hosted on Render][screenshots/indexPage.png](https://github.com/itsmesf/UniConfMgr/blob/d0688858adb75c747688cbed53b9e0b324bd91f8/screenshots/indexPage.png)
+![UniConfMgr Landing Page Screenshot](https://raw.githubusercontent.com/itsmesf/UniConfMgr/main/screenshots/indexPage.png)
 
 **Note:** This project was developed as a **Mini Project for college curriculum fulfillment.**
 
