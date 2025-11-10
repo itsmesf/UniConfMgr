@@ -1,7 +1,6 @@
 # UniConfMgr: The Academic Nexus
 
 **UniConfMgr (Unified Conference Manager)** is a functional web platform built with **Flask** and **SQLAlchemy** designed to centralize the management of academic conferences across university departments.
-## Application Preview
 
 ![UniConfMgr Landing Page Screenshot](https://raw.githubusercontent.com/itsmesf/UniConfMgr/main/screenshots/indexPage.png)
 
