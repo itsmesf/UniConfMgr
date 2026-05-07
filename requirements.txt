@@ -10,3 +10,5 @@ gunicorn
 psycopg2-binary
 email-validator
 sendgrid
+xhtml2pdf
+reportlab
